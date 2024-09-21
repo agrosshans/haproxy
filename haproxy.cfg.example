@@ -1,0 +1,31 @@
+# /etc/haproxy/haproxy.cfg
+
+# Global settings
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+# Default settings
+defaults
+    log     global
+    mode    tcp                      # Operate in TCP mode
+    option  tcplog                   # Log in TCP mode
+    timeout connect 5s               # Timeout for establishing connections
+    timeout client  1m               # Timeout for client inactivity
+    timeout server  1m               # Timeout for server inactivity
+
+# Frontend: Where HAProxy listens for incoming traffic on port 5022
+frontend tcp-in
+    bind 192.168.1.162:5022                      # Listen on port 5022 for any TCP traffic
+    default_backend direct-backend    # Forward all traffic to the backend
+
+# Backend: Direct TCP proxying without further routing
+backend direct-backend
+    mode tcp                         # Operate in TCP mode
+    option tcp-check                 # Optional: Check server health using TCP
+    server direct-server 192.168.1.62:5022 check  # Forward traffic to a single server
